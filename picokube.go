@@ -3,6 +3,8 @@ package main
 import (
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"syscall"
 
 	"github.com/urfave/cli"
 )
@@ -13,7 +15,51 @@ func check(e error) {
 	}
 }
 
+// type SSHCommander struct {
+// 	User string
+// 	IP   string
+// }
+
+// func (s *SSHCommander) Command(cmd ...string) *exec.Cmd {
+// 	arg := append(
+// 		[]string{
+// 			fmt.Sprintf("%s@%s", s.User, s.IP),
+// 		},
+// 		cmd...,
+// 	)
+// 	return exec.Command("ssh", arg...)
+// }
+
 func main() {
+	// For our example we'll exec `ls`. Go requires an
+	// absolute path to the binary we want to execute, so
+	// we'll use `exec.LookPath` to find it (probably
+	// `/bin/ls`).
+	binary, lookErr := exec.LookPath("docker")
+	if lookErr != nil {
+		panic(lookErr)
+	}
+
+	// `Exec` requires arguments in slice form (as
+	// apposed to one big string). We'll give `ls` a few
+	// common arguments. Note that the first argument should
+	// be the program name.
+	args := []string{"docker", "images"}
+
+	// `Exec` also needs a set of [environment variables](environment-variables)
+	// to use. Here we just provide our current
+	// environment.
+	env := os.Environ()
+
+	// Here's the actual `syscall.Exec` call. If this call is
+	// successful, the execution of our process will end
+	// here and be replaced by the `/bin/ls -a -l -h`
+	// process. If there is an error we'll get a return
+	// value.
+	execErr := syscall.Exec(binary, args, env)
+	if execErr != nil {
+		panic(execErr)
+	}
 
 	cli.VersionFlag = cli.BoolFlag{
 		Name:  "print-version, V",
@@ -67,6 +113,7 @@ applications:
 
 				err := ioutil.WriteFile("cluster-compose.yml", []byte(out), 0644)
 				check(err)
+
 				return nil
 			},
 		},
