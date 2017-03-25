@@ -1,0 +1,8 @@
+
+applications:
+  - name: kubernetes-dashboard
+    namespace: kube-system
+    workdir: dashboard
+    nodedir: dashboard
+    service: dashboard
+    port: 80s

@@ -1,10 +1,17 @@
 package main
 
 import (
+	"io/ioutil"
 	"os"
 
 	"github.com/urfave/cli"
 )
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
 
 func main() {
 
@@ -14,7 +21,7 @@ func main() {
 	}
 
 	app := cli.NewApp()
-	app.Name = "picokube"
+	app.Name = "cluster-compose"
 	app.Version = ".1"
 	app.Usage = "Instantly run and develop Kubernetes applications with just Docker"
 
@@ -25,8 +32,9 @@ func main() {
 			Usage: "Local work directory to mount inside the node. Defaults to current directory`",
 		},
 		cli.StringFlag{
-			Name:  "destination, d",
-			Usage: "Work directory destinatin inside the node. Defaults to /workdir`",
+			Name:  "nodedir, n",
+			Value: "/workdir",
+			Usage: "Work directory destination inside the node. Defaults to /nodedir`",
 		},
 
 		cli.StringFlag{
@@ -35,24 +43,50 @@ func main() {
 		},
 
 		cli.StringFlag{
-			Name:  "init, i",
-			Usage: "Initialize an example picokube.yaml",
+			Name:  "service, s",
+			Usage: "Service to launch in browser at http://SERVICENAME.127.0.0.1.xip.io",
+			Value: "dashboard.kube-system",
 		},
 	}
 
 	app.Commands = []cli.Command{
 		{
-			Name:    "complete",
-			Aliases: []string{"c"},
-			Usage:   "complete a task on the list",
+			Name:  "init",
+			Usage: "generate an example cluster-compose.yaml",
+			Action: func(c *cli.Context) error {
+
+				const out = `
+applications:
+  - name: kubernetes-dashboard
+    namespace: kube-system
+    workdir: dashboard
+    nodedir: dashboard
+    service: dashboard
+    port: 80s
+`
+
+				err := ioutil.WriteFile("cluster-compose.yml", []byte(out), 0644)
+				check(err)
+				return nil
+			},
+		},
+		{
+			Name:  "up",
+			Usage: "launch cluster",
 			Action: func(c *cli.Context) error {
 				return nil
 			},
 		},
 		{
-			Name:    "add",
-			Aliases: []string{"a"},
-			Usage:   "add a task to the list",
+			Name:  "down",
+			Usage: "stop cluster",
+			Action: func(c *cli.Context) error {
+				return nil
+			},
+		},
+		{
+			Name:  "clean",
+			Usage: "delete cluster",
 			Action: func(c *cli.Context) error {
 				return nil
 			},
