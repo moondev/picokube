@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs
+  labels:
+    app: nodejs
+spec:
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app: nodejs
+    tier: nodejs
+  type: NodePort
+  
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nodejs
+  labels:
+    app: nodejs
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nodejs
+        tier: nodejs
+    spec:
+      containers:
+      - image: node:6
+        name: nodejs
+        command: ["/app/start.sh"]
+        ports:
+        - containerPort: 3000
+          name: nodejs
+        volumeMounts:
+        - name: app
+          mountPath: /app
+      volumes:
+      - name: app
+        hostPath:
+          path: /workdir/apps/nodejs
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: nodejs-ingress
+spec:
+ rules:
+   - host: nodejs.127.0.0.1.xip.io
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: nodejs
+             servicePort: 3000
