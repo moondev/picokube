@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -14,16 +16,6 @@ func writeFile(contents string, fileName string) {
 
 	pwd, err := os.Getwd()
 	check(err)
-	//fmt.Println(pwd)
-
-	//say(contents)
-	//say(fileName)
-
-	// ex, err := os.Executable()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// exPath := path.Dir(ex)
 
 	fullFileName := fmt.Sprint(pwd, "/", fileName)
 	err2 := ioutil.WriteFile(fullFileName, []byte(contents), 0777)
@@ -51,17 +43,29 @@ func runCmd(cmd []string) {
 	check(execErr)
 }
 
-// type Inventory struct {
-// 	Material string
-// 	Count    uint
-// }
+type Settings struct {
+	Folder string //exported
+}
 
 func main() {
 	// env := os.Environ()
 	pwd, err := os.Getwd()
-	check(err)
+	check(err)'
 
 	say(pwd)
+
+	t := template.New("hello template") //create a new template with some name
+	t, _ = t.Parse(cc)                  //parse some content and generate a template, which is an internal representation
+
+	p := Settings{Folder: pwd} //define an instance with required field
+
+	var doc bytes.Buffer
+	t.Execute(&doc, p)
+	s := doc.String()
+
+	//t.Execute(os.Stdout, p) //merge template ‘t’ with content of ‘p’
+
+	writeFile(s, "cluster-compose.sh")
 
 	// sweaters := Inventory{"wool", 17}
 
@@ -619,7 +623,7 @@ function dind::run {
   
 
   if [[ "${container_name}" == "kube-node-1" ]]; then
-    opts+=(-v "$PWD:/workdir")
+    opts+=(-v "{{.Folder}}:/workdir")
   fi
 
   # Start the new container.
@@ -1122,5 +1126,4 @@ case "${1:-}" in
     exit 1
     ;;
 esac
-
 `
