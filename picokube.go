@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -14,10 +12,10 @@ import (
 
 func writeFile(contents string, fileName string) {
 
-	pwd, err := os.Getwd()
-	check(err)
+	//pwd, err := os.Getwd()
+	//check(err)
 
-	fullFileName := fmt.Sprint(pwd, "/", fileName)
+	fullFileName := fmt.Sprint(fileName)
 	err2 := ioutil.WriteFile(fullFileName, []byte(contents), 0777)
 	check(err2)
 }
@@ -48,103 +46,27 @@ type Settings struct {
 }
 
 func main() {
+	homedir := "/Users/chad/.cluster-compose/"
+
+	//newpath := filepath.Join(homedir)
+	//os.MkdirAll(newpath, os.ModePerm)
+
 	// env := os.Environ()
 	pwd, err := os.Getwd()
 	check(err)
 
 	say(pwd)
 
-	t := template.New("hello template") //create a new template with some name
-	t, _ = t.Parse(cc)                  //parse some content and generate a template, which is an internal representation
+	// t := template.New("hello template") //create a new template with some name
+	// t, _ = t.Parse(cc)                  //parse some content and generate a template, which is an internal representation
 
-	p := Settings{Folder: pwd} //define an instance with required field
+	// p := Settings{Folder: pwd} //define an instance with required field
 
-	var doc bytes.Buffer
-	t.Execute(&doc, p)
-	s := doc.String()
+	// var doc bytes.Buffer
+	// t.Execute(&doc, p)
+	// s := doc.String()
 
-	//t.Execute(os.Stdout, p) //merge template ‘t’ with content of ‘p’
-
-	writeFile(s, "cluster-compose.sh")
-
-	// sweaters := Inventory{"wool", 17}
-
-	// tmpl, err := template.New("test").Parse("{{.Count}} items are made of {{.Material}}")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// err = tmpl.Execute(os.Stdout, sweaters)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	writeFile(cc, "cluster.sh")
-
-	//runCmd([]string{pwd + "/cluster.sh", "up"})
-	// docker exec -it 7a5fcaa2cecc apk update
-	// docker exec -it 7a5fcaa2cecc apk add bash git
-
-	// docker, dockerErr := exec.LookPath(cmd[0])
-	// check(dockerErr)
-	// dockerExecErr := syscall.Exec(docker, cmd, env)
-	// check(dockerExecErr)
-
-	// cmd2 := []string{"kubectl"}
-	// docker2, dockerErr2 := exec.LookPath(cmd2[0])
-	// check(dockerErr2)
-	// dockerExecErr2 := syscall.Exec(docker2, cmd, env)
-	// check(dockerExecErr2)
-
-	// endpoint := "unix:///var/run/docker.sock"
-	// client, err := docker.NewClient(endpoint)
-	// check(err)
-	// imgs, err := client.ListImages(docker.ListImagesOptions{All: false})
-	// check(err)
-
-	// say(imgs)
-
-	// ctx := context.Background()
-	// cli, err := client.NewEnvClient()
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// _, err = cli.ImagePull(ctx, "alpine", types.ImagePullOptions{})
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// resp, err := cli.ContainerCreate(ctx, &container.Config{
-	// 	Image: "alpine",
-	// 	Cmd:   []string{"echo", "hello world"},
-	// }, nil, nil, "")
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-	// 	panic(err)
-	// }
-
-	// if _, err = cli.ContainerWait(ctx, resp.ID); err != nil {
-	// 	panic(err)
-	// }
-
-	// out, err := cli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true})
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// io.Copy(os.Stdout, out)
-
-	// for _, img := range imgs {
-	// 	fmt.Println("ID: ", img.ID)
-	// 	fmt.Println("RepoTags: ", img.RepoTags)
-	// 	fmt.Println("Created: ", img.Created)
-	// 	fmt.Println("Size: ", img.Size)
-	// 	fmt.Println("VirtualSize: ", img.VirtualSize)
-	// 	fmt.Println("ParentId: ", img.ParentID)
-	// }
+	writeFile(cc, homedir+"cluster-compose.sh")
 
 	cli.VersionFlag = cli.BoolFlag{
 		Name:  "print-version, V",
@@ -186,8 +108,7 @@ func main() {
 			Usage: "generate an example cluster-compose.yaml",
 			Action: func(c *cli.Context) error {
 
-				writeFile(initYml, "cluster-compose.yml")
-				say("write file?")
+				writeFile(initYml, homedir+"cluster-compose.yml")
 				return nil
 			},
 		},
@@ -195,6 +116,7 @@ func main() {
 			Name:  "up",
 			Usage: "launch cluster",
 			Action: func(c *cli.Context) error {
+				runCmd([]string{"/Users/chad/.cluster-compose/cluster-compose.sh", "up"})
 				return nil
 			},
 		},
@@ -202,6 +124,7 @@ func main() {
 			Name:  "down",
 			Usage: "stop cluster",
 			Action: func(c *cli.Context) error {
+				runCmd([]string{"/Users/chad/.cluster-compose/cluster-compose.sh", "down"})
 				return nil
 			},
 		},
@@ -209,6 +132,7 @@ func main() {
 			Name:  "clean",
 			Usage: "delete cluster",
 			Action: func(c *cli.Context) error {
+				runCmd([]string{"/Users/chad/.cluster-compose/cluster-compose.sh", "clean"})
 				return nil
 			},
 		},
@@ -623,7 +547,7 @@ function dind::run {
   
 
   if [[ "${container_name}" == "kube-node-1" ]]; then
-    opts+=(-v "{{.Folder}}:/workdir")
+    opts+=(-v "/Users/chad/picokube:/workdir")
   fi
 
   # Start the new container.
