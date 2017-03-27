@@ -50,7 +50,7 @@ type Settings struct {
 func main() {
 	// env := os.Environ()
 	pwd, err := os.Getwd()
-	check(err)'
+	check(err)
 
 	say(pwd)
 
