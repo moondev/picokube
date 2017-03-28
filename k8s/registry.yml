@@ -26,6 +26,7 @@ spec:
   ports:
     - port: 5000
       targetPort: 5000
+      nodePort: 30600
   selector:
     app: registry
   type: NodePort

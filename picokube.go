@@ -522,7 +522,8 @@ function dind::run {
 
   if [[ "${container_name}" == "kube-node-1" ]]; then
     opts+=(-p "80:80")
-    opts+=(-p "30912:30912")
+    opts+=(-p "30565:30912")
+    opts+=(-p "5000:5000")
   fi
 
 
