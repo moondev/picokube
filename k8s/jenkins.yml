@@ -6,12 +6,12 @@ metadata:
     type: local
 spec:
   capacity:
-    storage: 4Gi
+    storage: 1Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
     # path: "/workdir/jenkins/"
-    path: "/jenkins/"
+    path: "/data/jenkins/"
 
 ---
 kind: PersistentVolumeClaim
@@ -23,7 +23,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 4Gi
+      storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
@@ -73,12 +73,6 @@ spec:
       - name: docker
         hostPath:
           path: /var/run/docker.sock
-      # - name: docker-bin
-      #   hostPath:
-      #     path: /usr/bin/docker
-      # - name: kubectl-bin
-      #   hostPath:
-      #     path: /usr/bin/kubectl
       - name: jenkins-persistent-storage
         persistentVolumeClaim:
           claimName: jenkins-claim

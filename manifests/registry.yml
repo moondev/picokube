@@ -1,3 +1,30 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: registry
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 4Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/registry/"
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: registry-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+---
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -36,6 +63,8 @@ spec:
         volumeMounts:
         - name: docker
           mountPath: /var/run/docker.sock
+        - name: registry-persistent-storage
+          mountPath: /var/lib/registry
         ports:
         - containerPort: 5000
           name: registry
@@ -43,6 +72,9 @@ spec:
       - name: docker
         hostPath:
           path: /var/run/docker.sock
+      - name: registry-persistent-storage
+        persistentVolumeClaim:
+          claimName: registry-claim
 
 ---
 apiVersion: extensions/v1beta1
