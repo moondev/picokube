@@ -10,7 +10,8 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/workdir/jenkins/"
+    # path: "/workdir/jenkins/"
+    path: "/jenkins/"
 
 ---
 kind: PersistentVolumeClaim
