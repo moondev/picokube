@@ -64,8 +64,8 @@ spec:
         - containerPort: 8080
           name: jenkins
         volumeMounts:
-        - name: jenkins-persistent-storage
-          mountPath: /root/.jenkins
+        # - name: jenkins-persistent-storage
+        #   mountPath: /root/.jenkins
         - name: docker
           mountPath: /var/run/docker.sock
         # - name: docker-bin

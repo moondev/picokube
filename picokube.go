@@ -518,13 +518,13 @@ function dind::run {
     opts+=(-p "$portforward")
     #opts+=(-p "127.0.0.1:80:80")
     # opts+=(-p "8080:8080")
-    # opts+=(-p "80:30912")
+    # opts+=(-p "127.0.0.1:30400:30400")
   fi
 
   if [[ "${container_name}" == "kube-node-1" ]]; then
     opts+=(-p "80:80")
-    opts+=(-p "30565:30912")
-    opts+=(-p "5000:5000")
+    opts+=(-p "30400:30400")
+   # opts+=(-p "5000:5000")
   fi
 
 
