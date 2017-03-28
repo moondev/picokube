@@ -11,7 +11,7 @@ spec:
     - ReadWriteOnce
   hostPath:
     # path: "/workdir/jenkins/"
-    path: "/data/jenkins/"
+    path: "/jenkins/"
 
 ---
 kind: PersistentVolumeClaim
