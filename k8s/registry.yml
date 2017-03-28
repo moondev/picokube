@@ -1,21 +1,3 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: registry
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: registry
-    spec:
-      containers:
-      - name: registry
-        image: registry:latest
-        ports:
-        - containerPort: 5000
-
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -26,91 +8,65 @@ spec:
   ports:
     - port: 5000
       targetPort: 5000
-      nodePort: 30600
   selector:
     app: registry
-  type: NodePort
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: registry-ui
-  labels:
-    app: registry-ui
-spec:
-  ports:
-    - port: 8080
-      targetPort: 8080
-  selector:
-    app: registry-ui
-    tier: registry-ui
+    tier: registry
   type: NodePort
   
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: registry-ui
+  name: registry
   labels:
-    app: registry-ui
+    app: registry
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: registry-ui
-        tier: registry-ui
+        app: registry
+        tier: registry
     spec:
       containers:
-      - image: hyper/docker-registry-web
-        name: registry-ui
+      - image: registry:2
+        name: registry
         ports:
-        - containerPort: 8080
-          name: registry-ui
-        env:
-          - name: REGISTRY_URL
-            value: http://registry:5000/v2
-          - name: REGISTRY_NAME
-            value: cluster-registry
+        - containerPort: 5000
+          name: registry
 
 ---
 apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
- name: registry-ui-ingress
-spec:
- rules:
-   - host: registry.127.0.0.1.xip.io
-     http:
-       paths:
-         - path: /
-           backend:
-             serviceName: registry-ui
-             servicePort: 8080
----
-apiVersion: v1
-kind: Pod
+kind: DaemonSet
 metadata:
   name: kube-registry-proxy
+  labels:
+    k8s-app: kube-registry
+    kubernetes.io/cluster-service: "true"
+    version: v0.4
 spec:
-  containers:
-  - name: kube-registry-proxy
-    image: gcr.io/google_containers/kube-registry-proxy:0.3
-    resources:
-      limits:
-        cpu: 100m
-        memory: 50Mi
-    env:
-    - name: REGISTRY_HOST
-      value: registry.default.svc.cluster.local
-    - name: REGISTRY_PORT
-      value: "5000"
-    - name: FORWARD_PORT
-      value: "5000"
-    ports:
-    - name: registry
-      containerPort: 5000
-      hostPort: 5000
-
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-registry
+        kubernetes.io/name: "kube-registry-proxy"
+        kubernetes.io/cluster-service: "true"
+        version: v0.4
+    spec:
+      containers:
+      - name: kube-registry-proxy
+        image: gcr.io/google_containers/kube-registry-proxy:0.4
+        resources:
+          limits:
+            cpu: 100m
+            memory: 50Mi
+        env:
+        - name: REGISTRY_HOST
+          value: registry.default.svc.cluster.local
+        - name: REGISTRY_PORT
+          value: "5000"
+        ports:
+        - name: registry
+          containerPort: 80
+          hostPort: 5000
