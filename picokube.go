@@ -235,6 +235,7 @@ if [[ ! ${BUILD_KUBEADM} && ! ${BUILD_HYPERKUBE} ]]; then
   use_k8s_source=
 fi
 if [[ ${use_k8s_source} ]]; then
+  echo "source" > source.txt
   dind::need-source
   kubectl=cluster/kubectl.sh
   if [[ ! -f ${build_tools_dir}/common.sh ]]; then

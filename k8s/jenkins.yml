@@ -1,29 +1,29 @@
-kind: PersistentVolume
-apiVersion: v1
-metadata:
-  name: jenkins
-  labels:
-    type: local
-spec:
-  capacity:
-    storage: 2Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/data/jenkins/"
+# kind: PersistentVolume
+# apiVersion: v1
+# metadata:
+#   name: jenkins
+#   labels:
+#     type: local
+# spec:
+#   capacity:
+#     storage: 2Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   hostPath:
+#     path: "/data/jenkins/"
 
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: jenkins-claim
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
----
+# ---
+# kind: PersistentVolumeClaim
+# apiVersion: v1
+# metadata:
+#   name: jenkins-claim
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 2Gi
+# ---
 apiVersion: v1
 kind: Service
 metadata:
@@ -32,8 +32,9 @@ metadata:
     app: jenkins
 spec:
   ports:
-    - port: 80
+    - port: 8080
       targetPort: 8080
+      name: jenkins
   selector:
     app: jenkins
     tier: jenkins
@@ -55,8 +56,8 @@ spec:
         tier: jenkins
     spec:
       containers:
-      - image: chadmoon/jenkins-docker-kubectl:latest
-        name: jenkins
+      - name: jenkins
+        image: chadmoon/jenkins-docker-kubectl
         securityContext:
           privileged: true
         ports:
@@ -67,13 +68,39 @@ spec:
           mountPath: /root/.jenkins
         - name: docker
           mountPath: /var/run/docker.sock
+        # - name: docker-bin
+        #   mountPath: /usr/bin/docker
+        # - name: kubectl-bin
+        #   mountPath: /usr/bin/kubectl
+      # - image: registry:2
+      #   name: registry
+      #   volumeMounts:
+      #   - name: jenkins-persistent-storage
+      #     mountPath: /root/.jenkins
+      #   - name: docker
+      #     mountPath: /var/run/docker.sock
+      #   ports:
+      #   - containerPort: 5000
+      #     name: registry
+      # - image: ubuntu:xenial
+      #   name: socat
+      #   command:
+      #     - bash
+      #     - -c
+      #     - "apt-get update; apt-get install -y socat; socat TCP4-LISTEN:5000,fork,reuseaddr TCP4:registry:5000"
       volumes:
       - name: docker
         hostPath:
           path: /var/run/docker.sock
-      - name: jenkins-persistent-storage
-        persistentVolumeClaim:
-          claimName: jenkins-claim
+      # - name: docker-bin
+      #   hostPath:
+      #     path: /usr/bin/docker
+      # - name: kubectl-bin
+      #   hostPath:
+      #     path: /usr/bin/kubectl
+      # - name: jenkins-persistent-storage
+      #   persistentVolumeClaim:
+      #     claimName: jenkins-claim
 
 ---
 apiVersion: extensions/v1beta1
